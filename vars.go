@@ -23,14 +23,27 @@ var (
 		},
 	}
 
-	emphasize = color.New(color.Bold, color.FgHiRed).SprintFunc()
-	hiYellow  = color.New(color.FgHiYellow).SprintFunc()
-	hiWhite   = color.New(color.FgHiWhite).SprintFunc()
-	hiRed     = color.New(color.FgRed).SprintFunc()
+	emphasizeField = color.New(color.Bold, color.FgHiRed).SprintFunc()
+	defaultField   = color.New(color.Bold, color.FgHiWhite).SprintFunc()
+	hiYellow       = color.New(color.FgHiYellow).SprintFunc()
+	hiWhite        = color.New(color.FgHiWhite).SprintFunc()
+	hiRed          = color.New(color.FgRed).SprintFunc()
 )
 
 type symbolConfig struct {
 	topEnd, middle, bottomEnd string
 }
 
-// func defaultSymbolConfig()
+func getColorFunc(level level) func(a ...interface{}) string {
+	if level == info {
+		return hiWhite
+	}
+	if level == warn {
+		return hiYellow
+	}
+	if level == err {
+		return hiRed
+	}
+
+	return hiWhite
+}
