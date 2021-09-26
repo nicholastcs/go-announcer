@@ -55,6 +55,9 @@ func (ann *Announcer) write(level level, msg string, cb ...*AnnouncementArgs) {
 	if len(cb) == 0 {
 		cb = append(cb, Args())
 	}
+	if cb[0] == nil {
+		cb[0] = Args()
+	}
 
 	text := ann.formatter.compose(level, msg, cb[0].contexes)
 	fmt.Fprint(outputs[level], text+fmt.Sprintln())

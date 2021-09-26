@@ -30,16 +30,18 @@ func (f *defaultAnnouncementFormatter) compile(level level, msg string, ctxs map
 
 	resultant := msg
 
+	if compiledContexts == "" && strings.TrimSpace(msg) == "" {
+		resultant = "empty announcement"
+	}
+
 	if compiledContexts != "" {
 		resultant = compiledContexts + fmt.Sprintln() + resultant
 	}
 
-	wrapped := strings.TrimLeft(
-		wordwrap.WrapString(
-			resultant,
-			f.maxWordPerLine,
-		), fmt.Sprintln(),
-	)
+	wrapped := wordwrap.WrapString(resultant, f.maxWordPerLine)
+
+	wrapped = strings.TrimLeft(wrapped, fmt.Sprintln())
+	wrapped = strings.TrimRight(wrapped, fmt.Sprintln())
 
 	wrapped = fmt.Sprintln() + wrapped + fmt.Sprintln()
 
@@ -53,9 +55,12 @@ func (f *defaultAnnouncementFormatter) compileContexts(ctxs map[string]Context) 
 	var sb strings.Builder
 
 	for field, ctx := range ctxs {
-		colorizedField := field
+		var colorizedField string
+
 		if ctx.emphasize {
-			colorizedField = emphasize(colorizedField)
+			colorizedField = emphasizeField(field)
+		} else {
+			colorizedField = defaultField(field)
 		}
 		sb.WriteString(fmt.Sprintf("%s%s: %s\n", tab, colorizedField, strings.TrimRight(ctx.value, fmt.Sprintln())))
 	}
@@ -91,18 +96,4 @@ func bars(level level, count int) []string {
 	bars[count-1] = colorFunc(bottomEnd)
 
 	return bars
-}
-
-func getColorFunc(level level) func(a ...interface{}) string {
-	if level == info {
-		return hiWhite
-	}
-	if level == warn {
-		return hiYellow
-	}
-	if level == err {
-		return hiRed
-	}
-
-	return hiWhite
 }
