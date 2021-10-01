@@ -24,11 +24,15 @@ var (
 
 type level string
 
+// Announcer is the struct that prints announcement to console or terminal.
 type Announcer struct {
 	mu        *sync.Mutex
 	formatter announcementFormatter
 }
 
+// New instantiates Announcer struct with sensible defaults.
+// Currently the API does not expose any means to customize the
+// Formatting or symbols.
 func New() *Announcer {
 	return &Announcer{
 		formatter: getDefaultFormatter(),
@@ -36,14 +40,18 @@ func New() *Announcer {
 	}
 }
 
+// Tell tells an announcement.
 func (ann *Announcer) Tell(msg string, cb ...*AnnouncementArgs) {
 	ann.write(info, msg, cb...)
 }
 
+// Warn tells a warning. Emphasis bar is yellow color.
 func (ann *Announcer) Warn(msg string, cb ...*AnnouncementArgs) {
 	ann.write(warn, msg, cb...)
 }
 
+// Error tells a error. Emphasis bar is red.
+// Emits in stderr.
 func (ann *Announcer) Error(msg string, cb ...*AnnouncementArgs) {
 	ann.write(err, msg, cb...)
 }
@@ -65,6 +73,7 @@ func (ann *Announcer) write(level level, msg string, cb ...*AnnouncementArgs) {
 	ann.mu.Unlock()
 }
 
+// Redirect stream to a io.Writer instead of stdout or stderr.
 func Redirect(w io.Writer) error {
 	if w == nil {
 		return errors.New("w io.Writer should not be nil")
